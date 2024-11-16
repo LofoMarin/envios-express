@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Package, Truck, CreditCard, User, Send, LogIn, UserPlus, Percent, Wallet, ClipboardList } from 'lucide-react'
+import { Package, Truck, CreditCard, User, Send, LogIn, UserPlus, Percent, Wallet, ClipboardList, ArrowLeft } from 'lucide-react'
 
 interface TimelineItem {
   estado: string
@@ -26,6 +26,7 @@ interface Pedido {
   costo: number
   estado: string
   fecha: string
+  metodoPago: string
   timeline: TimelineItem[]
 }
 
@@ -90,6 +91,7 @@ const PedidoCard: React.FC<PedidoCardProps> = ({ pedido }) => {
                 <div>Tipo de envío: {pedido.tipoEnvio}</div>
                 <div>Peso: {pedido.peso} kg</div>
                 <div>Costo: ${pedido.costo.toFixed(2)}</div>
+                <div>Método de pago: {pedido.metodoPago}</div>
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium text-gray-700">Línea de tiempo:</div>
@@ -150,6 +152,8 @@ export default function EnviosExpress() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeAccountTab, setActiveAccountTab] = useState('login')
+  const [activeAccountSection, setActiveAccountSection] = useState('')
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('')
   const [descuentos, setDescuentos] = useState<Descuento[]>([
     { id: 1, nombre: "Descuento de bienvenida", descripcion: "10% en tu primer envío", reclamado: false },
     { id: 2, nombre: "Descuento de verano", descripcion: "15% en envíos internacionales", reclamado: false },
@@ -188,7 +192,7 @@ export default function EnviosExpress() {
   }
 
   const realizarPedido = () => {
-    if (costo > 0) {
+    if (costo > 0 && isLoggedIn && selectedPaymentMethod) {
       const nuevoPedido: Pedido = {
         id: Math.random().toString(36).substr(2, 9),
         trackingId: Math.random().toString(36).substr(2, 9).toUpperCase(),
@@ -199,6 +203,7 @@ export default function EnviosExpress() {
         costo: costo,
         estado: 'En proceso',
         fecha: new Date().toLocaleDateString(),
+        metodoPago: selectedPaymentMethod,
         timeline: [
           { estado: 'Pedido realizado', fecha: new Date().toLocaleDateString() },
           { estado: 'En preparación', fecha: new Date(Date.now() + 86400000).toLocaleDateString() },
@@ -210,6 +215,7 @@ export default function EnviosExpress() {
       setTrackingId(nuevoPedido.trackingId)
       setPedidoRealizado(true)
       setCostoCalculado(false)
+      setSelectedPaymentMethod('')
       setPedido({
         origen: '',
         destino: '',
@@ -259,9 +265,15 @@ export default function EnviosExpress() {
 
       <Tabs defaultValue="nuevo-pedido" className="w-full">
         <TabsList className="grid w-full grid-cols-3 bg-gray-100">
-          <TabsTrigger value="nuevo-pedido" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">Nuevo Pedido</TabsTrigger>
-          <TabsTrigger value="seguimiento" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">Seguimiento</TabsTrigger>
-          <TabsTrigger value="cuenta" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">Mi Cuenta</TabsTrigger>
+          <TabsTrigger value="nuevo-pedido" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">
+            Nuevo Pedido
+          </TabsTrigger>
+          <TabsTrigger value="seguimiento" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">
+            Seguimiento
+          </TabsTrigger>
+          <TabsTrigger value="cuenta" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">
+            Mi Cuenta
+          </TabsTrigger>
         </TabsList>
 
         <AnimatePresence mode="wait">
@@ -271,16 +283,24 @@ export default function EnviosExpress() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3 }}
+            className="mt-6"
           >
             <TabsContent value="nuevo-pedido">
               <Card className="border-gray-300 shadow-md bg-white">
-                <CardHeader className="bg-gray-100">
+                <CardHeader className="bg-gray-100 pt-8">
                   <CardTitle className="text-[#CA0007]">Realizar Nuevo Pedido</CardTitle>
                   <CardDescription className="text-gray-600">Ingrese los detalles de su envío</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  {!pedidoRealizado ? (
-                    <form className="space-y-4">
+                <CardContent className="pt-6">
+                  {!isLoggedIn ? (
+                    <div className="text-center space-y-4">
+                      <p className="text-gray-700">Para realizar un pedido, por favor inicie sesión o regístrese.</p>
+                      <Button onClick={() => setActiveTab('cuenta')} className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">
+                        Ir a Mi Cuenta
+                      </Button>
+                    </div>
+                  ) : !pedidoRealizado ? (
+                    <form className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="origen" className="text-gray-700">Origen</Label>
@@ -311,23 +331,45 @@ export default function EnviosExpress() {
                             <SelectTrigger id="tipo-envio" className="bg-white text-gray-700 border-gray-300">
                               <SelectValue placeholder="Seleccione tipo de envío" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white text-gray-700 border-gray-300">
+                            <SelectContent>
                               <SelectItem value="normal">Normal</SelectItem>
                               <SelectItem value="express">Express</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="metodo-pago" className="text-gray-700">Método de Pago</Label>
+                        <Select onValueChange={setSelectedPaymentMethod} value={selectedPaymentMethod}>
+                          <SelectTrigger id="metodo-pago" className="bg-white text-gray-700 border-gray-300">
+                            <SelectValue placeholder="Seleccione método de pago" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {metodosPago.map(metodo => (
+                              <SelectItem key={metodo.id} value={metodo.tipo}>
+                                {metodo.tipo} {metodo.numero}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="efectivo">Pago en efectivo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
                       <div className="flex space-x-4">
-                        <Button type="button" onClick={calcularCosto} className="flex-1 bg-[#CA0007] hover:bg-[#A80006] text-white">
+                        <Button 
+                          type="button" 
+                          onClick={calcularCosto} 
+                          className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white"
+                        >
                           Calcular Costo
                         </Button>
-                        <motion.div className="flex-1" whileHover={{ scale: costoCalculado ? 1.05 : 1 }} whileTap={{ scale: costoCalculado ? 0.95 : 1 }}>
+                        <motion.div whileHover={{ scale: costoCalculado ? 1.05 : 1 }} whileTap={{ scale: costoCalculado ? 0.95 : 1 }}>
                           <Button 
                             type="button" 
                             onClick={realizarPedido} 
-                            className="w-full bg-[#CA0007] hover:bg-[#A80006] text-white" 
-                            disabled={!costoCalculado}
+                            className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white" 
+                            disabled={!costoCalculado || !selectedPaymentMethod}
                           >
                             Realizar Pedido
                           </Button>
@@ -342,7 +384,7 @@ export default function EnviosExpress() {
                     >
                       <p className="text-green-600 text-xl">¡Pedido realizado con éxito!</p>
                       <p className="text-gray-700">Número de seguimiento: {trackingId}</p>
-                      <Button onClick={reiniciarFormulario} className="bg-[#CA0007] hover:bg-[#A80006] text-white">
+                      <Button onClick={reiniciarFormulario} className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">
                         Realizar nuevo envío
                       </Button>
                     </motion.div>
@@ -368,11 +410,11 @@ export default function EnviosExpress() {
 
             <TabsContent value="seguimiento">
               <Card className="border-gray-300 shadow-md bg-white">
-                <CardHeader className="bg-gray-100">
+                <CardHeader className="bg-gray-100 pt-8">
                   <CardTitle className="text-[#CA0007]">Seguimiento de Pedidos</CardTitle>
                   <CardDescription className="text-gray-600">Historial de sus envíos</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <div className="space-y-4">
                     {pedidos.length === 0 ? (
                       <p className="text-gray-600 text-center">No hay pedidos realizados aún.</p>
@@ -388,11 +430,11 @@ export default function EnviosExpress() {
 
             <TabsContent value="cuenta">
               <Card className="border-gray-300 shadow-md bg-white">
-                <CardHeader className="bg-gray-100">
+                <CardHeader className="bg-gray-100 pt-8">
                   <CardTitle className="text-[#CA0007]">Mi Cuenta</CardTitle>
                   <CardDescription className="text-gray-600">Gestione su cuenta, descuentos y pagos</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   {!isLoggedIn ? (
                     <Tabs value={activeAccountTab} onValueChange={setActiveAccountTab} className="w-full">
                       <TabsList className="grid w-full grid-cols-2 bg-gray-100">
@@ -437,58 +479,88 @@ export default function EnviosExpress() {
                       </TabsContent>
                     </Tabs>
                   ) : (
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-700 mb-2 flex items-center">
-                          <Percent className="w-5 h-5 mr-2" />
-                          Descuentos Disponibles
-                        </h3>
-                        <div className="space-y-2">
-                          {descuentos.map(descuento => (
-                            <DescuentoCard key={descuento.id} descuento={descuento} onReclamar={reclamarDescuento} />
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-700 mb-2 flex items-center">
-                          <Wallet className="w-5 h-5 mr-2" />
-                          Métodos de Pago
-                        </h3>
-                        <div className="space-y-2">
-                          {metodosPago.map(metodo => (
-                            <Card key={metodo.id} className="border-gray-300 bg-gray-100">
-                              <CardContent className="flex justify-between items-center p-4">
-                                <div>
-                                  <p className="text-sm font-medium text-gray-700">{metodo.tipo}</p>
-                                  <p className="text-xs text-gray-500">{metodo.numero}</p>
-                                </div>
-                                <Button variant="outline" size="sm" className="text-gray-600 border-gray-300 hover:bg-gray-200">
-                                  Editar
-                                </Button>
-                              </CardContent>
-                            </Card>
-                          ))}
-                          <Button className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">
-                            Agregar Método de Pago
+                    <div className="space-y-8">
+                      {activeAccountSection === '' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                          <Button 
+                            onClick={() => setActiveAccountSection('descuentos')} 
+                            className="flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-all hover:shadow-md"
+                          >
+                            <Percent className="w-12 h-12 mb-4" />
+                            <span className="text-lg font-medium">Descuentos</span>
+                          </Button>
+                          <Button 
+                            onClick={() => setActiveAccountSection('pagos')} 
+                            className="flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-all hover:shadow-md"
+                          >
+                            <Wallet className="w-12 h-12 mb-4" />
+                            <span className="text-lg font-medium">Métodos de Pago</span>
+                          </Button>
+                          <Button 
+                            onClick={() => setActiveAccountSection('historial')} 
+                            className="flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-all hover:shadow-md"
+                          >
+                            <ClipboardList className="w-12 h-12 mb-4" />
+                            <span className="text-lg font-medium">Historial de Pedidos</span>
                           </Button>
                         </div>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-700 mb-2 flex items-center">
-                          <ClipboardList className="w-5 h-5 mr-2" />
-                          Historial de Pedidos
-                        </h3>
-                        <div className="space-y-2">
-                          {pedidos.slice(0, 3).map((pedido) => (
-                            <PedidoCard key={pedido.id} pedido={pedido} />
-                          ))}
-                          {pedidos.length > 3 && (
-                            <Button variant="outline" className="w-full text-gray-600 border-gray-300 hover:bg-gray-100">
-                              Ver todos los pedidos
-                            </Button>
+                      ) : (
+                        <div>
+                          <Button 
+                            onClick={() => setActiveAccountSection('')} 
+                            className="mb-6 flex items-center text-gray-600 hover:text-gray-800"
+                          >
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Volver
+                          </Button>
+                          {activeAccountSection === 'descuentos' && (
+                            <div>
+                              <h3 className="text-lg font-medium text-gray-700 mb-4">Descuentos Disponibles</h3>
+                              <div className="space-y-4">
+                                {descuentos.map(descuento => (
+                                  <DescuentoCard key={descuento.id} descuento={descuento} onReclamar={reclamarDescuento} />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {activeAccountSection === 'pagos' && (
+                            <div>
+                              <h3 className="text-lg font-medium text-gray-700 mb-4">Métodos de Pago</h3>
+                              <div className="space-y-4">
+                                {metodosPago.map(metodo => (
+                                  <Card key={metodo.id} className="border-gray-300 bg-gray-100">
+                                    <CardContent className="flex justify-between items-center p-4">
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-700">{metodo.tipo}</p>
+                                        <p className="text-xs text-gray-500">{metodo.numero}</p>
+                                      </div>
+                                      <Button variant="outline" size="sm" className="text-gray-600 border-gray-300 hover:bg-gray-200">
+                                        Editar
+                                      </Button>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                                <Button className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">
+                                  Agregar Método de Pago
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                          {activeAccountSection === 'historial' && (
+                            <div>
+                              <h3 className="text-lg font-medium text-gray-700 mb-4">Historial de Pedidos</h3>
+                              <div className="space-y-4">
+                                {pedidos.map((pedido) => (
+                                  <PedidoCard key={pedido.id} pedido={pedido} />
+                                ))}
+                                {pedidos.length === 0 && (
+                                  <p className="text-gray-600 text-center">No hay pedidos realizados aún.</p>
+                                )}
+                              </div>
+                            </div>
                           )}
                         </div>
-                      </div>
+                      )}
                     </div>
                   )}
                 </CardContent>
