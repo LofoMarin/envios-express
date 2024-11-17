@@ -28,6 +28,7 @@ interface Pedido {
   fecha: string
   metodoPago: string
   timeline: TimelineItem[]
+  descuentoAplicado: number
 }
 
 interface PedidoCardProps {
@@ -38,12 +39,14 @@ interface Descuento {
   id: number
   nombre: string
   descripcion: string
+  porcentaje: number
   reclamado: boolean
 }
 
 interface DescuentoCardProps {
   descuento: Descuento
   onReclamar: (id: number) => void
+  isActive: boolean
 }
 
 interface MetodoPago {
@@ -92,6 +95,9 @@ const PedidoCard: React.FC<PedidoCardProps> = ({ pedido }) => {
                 <div>Peso: {pedido.peso} kg</div>
                 <div>Costo: ${pedido.costo.toFixed(2)}</div>
                 <div>Método de pago: {pedido.metodoPago}</div>
+                {pedido.descuentoAplicado > 0 && (
+                  <div>Descuento aplicado: {pedido.descuentoAplicado}%</div>
+                )}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium text-gray-700">Línea de tiempo:</div>
@@ -110,19 +116,19 @@ const PedidoCard: React.FC<PedidoCardProps> = ({ pedido }) => {
   )
 }
 
-const DescuentoCard: React.FC<DescuentoCardProps> = ({ descuento, onReclamar }) => (
+const DescuentoCard: React.FC<DescuentoCardProps> = ({ descuento, onReclamar, isActive }) => (
   <Card className="border-gray-300 bg-gray-100">
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium text-gray-700">{descuento.nombre}</CardTitle>
       <Badge variant="outline" className={descuento.reclamado ? "text-gray-500 border-gray-400" : "text-green-600 border-green-500"}>
-        {descuento.reclamado ? "Reclamado" : "Disponible"}
+        {descuento.reclamado ? (isActive ? "Activo" : "Reclamado") : "Disponible"}
       </Badge>
     </CardHeader>
     <CardContent>
       <p className="text-sm text-gray-600">{descuento.descripcion}</p>
       {!descuento.reclamado && (
         <Button onClick={() => onReclamar(descuento.id)} className="mt-2 w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">
-          Reclamar
+          Reclamar y Aplicar
         </Button>
       )}
     </CardContent>
@@ -144,7 +150,6 @@ export default function EnviosExpress() {
     tipoEnvio: 'normal'
   })
   const [costo, setCosto] = useState(0)
-  const [descuento, setDescuento] = useState(0)
   const [trackingId, setTrackingId] = useState('')
   const [pedidoRealizado, setPedidoRealizado] = useState(false)
   const [activeTab, setActiveTab] = useState('nuevo-pedido')
@@ -154,10 +159,11 @@ export default function EnviosExpress() {
   const [activeAccountTab, setActiveAccountTab] = useState('login')
   const [activeAccountSection, setActiveAccountSection] = useState('')
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('')
+  const [descuentoActivo, setDescuentoActivo] = useState<Descuento | null>(null)
   const [descuentos, setDescuentos] = useState<Descuento[]>([
-    { id: 1, nombre: "Descuento de bienvenida", descripcion: "10% en tu primer envío", reclamado: false },
-    { id: 2, nombre: "Descuento de verano", descripcion: "15% en envíos internacionales", reclamado: false },
-    { id: 3, nombre: "Descuento de fidelidad", descripcion: "5% en todos los envíos", reclamado: true },
+    { id: 1, nombre: "Descuento de bienvenida", descripcion: "10% en tu primer envío", porcentaje: 10, reclamado: false },
+    { id: 2, nombre: "Descuento de verano", descripcion: "15% en envíos internacionales", porcentaje: 15, reclamado: false },
+    { id: 3, nombre: "Descuento de fidelidad", descripcion: "5% en todos los envíos", porcentaje: 5, reclamado: false },
   ])
   const [metodosPago, setMetodosPago] = useState<MetodoPago[]>([
     { id: 1, tipo: "Tarjeta de crédito", numero: "**** **** **** 1234" },
@@ -182,13 +188,21 @@ export default function EnviosExpress() {
     }
   }, [])
 
+  useEffect(() => {
+    if (activeTab === 'nuevo-pedido' && descuentoActivo && costoCalculado) {
+      calcularCosto()
+    }
+  }, [activeTab, descuentoActivo])
+
   const calcularCosto = () => {
-    const costoBase = parseFloat(pedido.peso) * 10
-    const costoExpress = pedido.tipoEnvio === 'express' ? costoBase * 0.5 : 0
-    const costoTotal = costoBase + costoExpress
-    const descuentoAplicado = costoTotal * (descuento / 100)
-    setCosto(costoTotal - descuentoAplicado)
-    setCostoCalculado(true)
+    if (pedido.peso) {
+      const costoBase = parseFloat(pedido.peso) * 10
+      const costoExpress = pedido.tipoEnvio === 'express' ? costoBase * 0.5 : 0
+      const costoTotal = costoBase + costoExpress
+      const descuentoAplicado = descuentoActivo ? costoTotal * (descuentoActivo.porcentaje / 100) : 0
+      setCosto(costoTotal - descuentoAplicado)
+      setCostoCalculado(true)
+    }
   }
 
   const realizarPedido = () => {
@@ -209,7 +223,8 @@ export default function EnviosExpress() {
           { estado: 'En preparación', fecha: new Date(Date.now() + 86400000).toLocaleDateString() },
           { estado: 'En tránsito', fecha: new Date(Date.now() + 172800000).toLocaleDateString() },
           { estado: 'Entregado', fecha: new Date(Date.now() + 259200000).toLocaleDateString() },
-        ]
+        ],
+        descuentoAplicado: descuentoActivo ? descuentoActivo.porcentaje : 0,
       }
       setPedidos([nuevoPedido, ...pedidos])
       setTrackingId(nuevoPedido.trackingId)
@@ -223,11 +238,8 @@ export default function EnviosExpress() {
         tipoEnvio: 'normal'
       })
       setCosto(0)
+      setDescuentoActivo(null)
     }
-  }
-
-  const simularDescuentoPersonalizado = () => {
-    setDescuento(Math.floor(Math.random() * 20))
   }
 
   const reiniciarFormulario = () => {
@@ -236,9 +248,16 @@ export default function EnviosExpress() {
   }
 
   const reclamarDescuento = (id: number) => {
-    setDescuentos(descuentos.map(d => 
-      d.id === id ? {...d, reclamado: true} : d
-    ))
+    const descuentoReclamado = descuentos.find(d => d.id === id)
+    if (descuentoReclamado && !descuentoReclamado.reclamado) {
+      setDescuentos(descuentos.map(d => 
+        d.id === id ? {...d, reclamado: true} : d
+      ))
+      setDescuentoActivo(descuentoReclamado)
+      if (costoCalculado) {
+        calcularCosto()
+      }
+    }
   }
 
   const handleLogin = (e: React.FormEvent) => {
@@ -356,6 +375,21 @@ export default function EnviosExpress() {
                         </Select>
                       </div>
 
+                      {descuentoActivo && (
+                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                          <strong className="font-bold">Descuento Aplicado: </strong>
+                          <span className="block sm:inline">
+                            {descuentoActivo.nombre} - {descuentoActivo.porcentaje}% de descuento
+                          </span>
+                          {!costoCalculado && (
+                            <p className="mt-2">El descuento será aplicado al momento de calcular el costo.</p>
+                          )}
+                          {costoCalculado && (
+                            <p className="mt-2">Nuevo costo total: ${costo.toFixed(2)}</p>
+                          )}
+                        </div>
+                      )}
+
                       <div className="flex space-x-4">
                         <Button 
                           type="button" 
@@ -399,8 +433,8 @@ export default function EnviosExpress() {
                       className="w-full text-center"
                     >
                       <p className="text-lg text-gray-700">Costo Total: ${costo.toFixed(2)}</p>
-                      {descuento > 0 && (
-                        <Badge variant="secondary" className="bg-[#CA0007] text-white">Descuento aplicado: {descuento}%</Badge>
+                      {descuentoActivo && (
+                        <Badge variant="secondary" className="bg-[#CA0007] text-white">Descuento aplicado: {descuentoActivo.porcentaje}%</Badge>
                       )}
                     </motion.div>
                   )}
@@ -518,7 +552,12 @@ export default function EnviosExpress() {
                               <h3 className="text-lg font-medium text-gray-700 mb-4">Descuentos Disponibles</h3>
                               <div className="space-y-4">
                                 {descuentos.map(descuento => (
-                                  <DescuentoCard key={descuento.id} descuento={descuento} onReclamar={reclamarDescuento} />
+                                  <DescuentoCard 
+                                    key={descuento.id} 
+                                    descuento={descuento} 
+                                    onReclamar={reclamarDescuento}
+                                    isActive={descuentoActivo?.id === descuento.id}
+                                  />
                                 ))}
                               </div>
                             </div>
