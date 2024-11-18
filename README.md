@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EnviosYa - Aplicación de Gestión de Envíos
 
-## Getting Started
+## Requisitos previos
 
-First, run the development server:
+Antes de comenzar, asegúrate de tener instalado lo siguiente:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js (versión 14.0.0 o superior)
+- npm (normalmente viene con Node.js)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Dependencias principales
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Este proyecto utiliza las siguientes dependencias principales:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- React (18.0.0 o superior)
+- Next.js (13.0.0 o superior)
+- Tailwind CSS
+- shadcn/ui (componentes de UI)
+- Framer Motion (para animaciones)
+- Lucide React (para iconos)
 
-## Learn More
+## Instalación
 
-To learn more about Next.js, take a look at the following resources:
+Sigue estos pasos para instalar y ejecutar el proyecto en tu máquina local:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Clona el repositorio:
+   ```
+   git clone [URL_DEL_REPOSITORIO]
+   cd enviosya
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Instala las dependencias:
+   ```
+   npm install
+   ```
 
-## Deploy on Vercel
+3. Crea un archivo `.env.local` en la raíz del proyecto y añade las variables de entorno necesarias (si las hay).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Ejecuta el servidor de desarrollo:
+   ```
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Abre tu navegador y visita `http://localhost:3000`
+
+## Dependencias detalladas
+
+Aquí está una lista más detallada de las dependencias que se utilizan en este proyecto:
+
+- `react`: ^18.2.0
+- `react-dom`: ^18.2.0
+- `next`: ^13.4.0
+- `@types/node`: ^20.2.5
+- `@types/react`: ^18.2.7
+- `@types/react-dom`: ^18.2.4
+- `typescript`: ^5.0.4
+- `tailwindcss`: ^3.3.2
+- `postcss`: ^8.4.23
+- `autoprefixer`: ^10.4.14
+- `framer-motion`: ^10.12.16
+- `lucide-react`: ^0.221.0
+- `@radix-ui/react-select`: ^1.2.1
+- `@radix-ui/react-label`: ^2.0.1
+- `@radix-ui/react-tabs`: ^1.0.3
+- `class-variance-authority`: ^0.6.0
+- `clsx`: ^1.2.1
+
+## Scripts disponibles
+
+- `npm run dev`: Inicia el servidor de desarrollo.
+- `npm run build`: Construye la aplicación para producción.
+- `npm start`: Inicia la aplicación en modo producción.
+- `npm run lint`: Ejecuta el linter para verificar el código.
+
+## Notas adicionales
+
+- Tener una conexión a Internet activa durante la instalación y ejecución del proyecto, ya que algunas dependencias y recursos pueden necesitar descargarse.
+- Si encuentras algún problema durante la instalación o ejecución, verifica que todas las dependencias estén correctamente instaladas y que estés usando las versiones correctas de Node.js y npm.
+
+
