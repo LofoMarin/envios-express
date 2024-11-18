@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Key } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +11,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Package, Truck, CreditCard, User, Send, LogIn, UserPlus, Percent, Wallet, ClipboardList } from 'lucide-react'
 
-const PedidoCard = ({ pedido }) => {
+interface Pedido {
+  id: Key | null | undefined
+  trackingId: string;
+  estado: string;
+  fecha: string;
+  origen: string;
+  destino: string;
+  tipoEnvio: string;
+  peso: number;
+  costo: number;
+  timeline: { estado: string; fecha: string }[];
+}
+
+const PedidoCard = ({ pedido }: { pedido: Pedido }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -68,7 +81,14 @@ const PedidoCard = ({ pedido }) => {
   )
 }
 
-const DescuentoCard = ({ descuento, onReclamar }) => (
+interface Descuento {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  reclamado: boolean;
+}
+
+const DescuentoCard = ({ descuento, onReclamar }: { descuento: Descuento, onReclamar: (id: number) => void }) => (
   <Card className="border-gray-600 bg-gray-700">
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium text-gray-200">{descuento.nombre}</CardTitle>
@@ -100,7 +120,7 @@ export function EnviosExpressComponent() {
   const [pedidoRealizado, setPedidoRealizado] = useState(false)
   const [activeTab, setActiveTab] = useState('nuevo-pedido')
   const [costoCalculado, setCostoCalculado] = useState(false)
-  const [pedidos, setPedidos] = useState([])
+  const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeAccountTab, setActiveAccountTab] = useState('login')
   const [descuentos, setDescuentos] = useState([
@@ -147,7 +167,7 @@ export function EnviosExpressComponent() {
         trackingId: Math.random().toString(36).substr(2, 9).toUpperCase(),
         origen: pedido.origen,
         destino: pedido.destino,
-        peso: pedido.peso,
+        peso: parseFloat(pedido.peso),
         tipoEnvio: pedido.tipoEnvio,
         costo: costo,
         estado: 'En proceso',
@@ -182,18 +202,18 @@ export function EnviosExpressComponent() {
     setTrackingId('')
   }
 
-  const reclamarDescuento = (id) => {
+  const reclamarDescuento = (id: number) => {
     setDescuentos(descuentos.map(d => 
       d.id === id ? {...d, reclamado: true} : d
     ))
   }
 
-  const handleLogin = (e) => {
+  const handleLogin = (e: { preventDefault: () => void }) => {
     e.preventDefault()
     setIsLoggedIn(true)
   }
 
-  const handleRegister = (e) => {
+  const handleRegister = (e: { preventDefault: () => void }) => {
     e.preventDefault()
     setIsLoggedIn(true)
   }
