@@ -73,7 +73,7 @@ Aquí está una lista más detallada de las dependencias que se utilizan en este
 
 ## Notas adicionales
 
-- Asegúrate de tener una conexión a Internet activa durante la instalación y ejecución del proyecto, ya que algunas dependencias y recursos pueden necesitar descargarse.
+- Tener una conexión a Internet activa durante la instalación y ejecución del proyecto, ya que algunas dependencias y recursos pueden necesitar descargarse.
 - Si encuentras algún problema durante la instalación o ejecución, verifica que todas las dependencias estén correctamente instaladas y que estés usando las versiones correctas de Node.js y npm.
 
-Para cualquier pregunta o problema, por favor abre un issue en el repositorio del proyecto.
+
