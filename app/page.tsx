@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Package, Truck, CreditCard, User, Send, LogIn, UserPlus, Percent, Wallet, ClipboardList, ArrowLeft } from 'lucide-react'
+import { Package, Truck, CreditCard, User, Send, LogIn, UserPlus, Percent, Wallet, ClipboardList, ArrowLeft, PlusCircle, MapPin, Calendar, DollarSign } from 'lucide-react'
 
 interface TimelineItem {
   estado: string
@@ -59,80 +59,95 @@ const PedidoCard: React.FC<PedidoCardProps> = ({ pedido }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Card className="border-gray-300 bg-gray-100">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-gray-700">Pedido #{pedido.trackingId}</CardTitle>
-        <Badge variant="outline" className="text-gray-600 border-gray-400">
-          {pedido.estado}
-        </Badge>
-      </CardHeader>
-      <CardContent>
-        <div className="text-xs text-gray-500 mb-2">Fecha: {pedido.fecha}</div>
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-700">
-            {pedido.origen} → {pedido.destino}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsOpen(!isOpen)}
-            className="text-gray-600 border-gray-300 hover:bg-gray-200"
-          >
-            {isOpen ? 'Ocultar' : 'Detalle'}
-          </Button>
-        </div>
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mt-4 space-y-2 overflow-hidden"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="border-gray-300 bg-gray-100 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-gray-700">Pedido #{pedido.trackingId}</CardTitle>
+          <Badge variant="outline" className="text-gray-600 border-gray-400">
+            {pedido.estado}
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="text-xs text-gray-500 mb-2">Fecha: {pedido.fecha}</div>
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-700">
+              {pedido.origen} → {pedido.destino}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-gray-600 border-gray-300 hover:bg-gray-200 transition-colors duration-200"
             >
-              <div className="text-sm text-gray-600">
-                <div>Tipo de envío: {pedido.tipoEnvio}</div>
-                <div>Peso: {pedido.peso} kg</div>
-                <div>Costo: ${pedido.costo.toFixed(2)}</div>
-                <div>Método de pago: {pedido.metodoPago}</div>
-                {pedido.descuentoAplicado > 0 && (
-                  <div>Descuento aplicado: {pedido.descuentoAplicado}%</div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-700">Línea de tiempo:</div>
-                {pedido.timeline.map((item, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${index === 0 ? 'bg-green-500' : 'bg-gray-400'}`} />
-                    <div className="text-xs text-gray-600">{item.estado} - {item.fecha}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </CardContent>
-    </Card>
+              {isOpen ? 'Ocultar' : 'Detalle'}
+            </Button>
+          </div>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mt-4 space-y-2 overflow-hidden"
+              >
+                <div className="text-sm text-gray-600">
+                  <div>Tipo de envío: {pedido.tipoEnvio}</div>
+                  <div>Peso: {pedido.peso} kg</div>
+                  <div>Costo: ${pedido.costo.toFixed(2)}</div>
+                  <div>Método de pago: {pedido.metodoPago}</div>
+                  {pedido.descuentoAplicado > 0 && (
+                    <div>Descuento aplicado: {pedido.descuentoAplicado}%</div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-gray-700">Línea de tiempo:</div>
+                  {pedido.timeline.map((item, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${index === 0 ? 'bg-green-500' : 'bg-gray-400'}`} />
+                      <div className="text-xs text-gray-600">{item.estado} - {item.fecha}</div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    </motion.div>
   )
 }
 
 const DescuentoCard: React.FC<DescuentoCardProps> = ({ descuento, onReclamar, isActive }) => (
-  <Card className="border-gray-300 bg-gray-100">
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium text-gray-700">{descuento.nombre}</CardTitle>
-      <Badge variant="outline" className={descuento.reclamado ? "text-gray-500 border-gray-400" : "text-green-600 border-green-500"}>
-        {descuento.reclamado ? (isActive ? "Activo" : "Reclamado") : "Disponible"}
-      </Badge>
-    </CardHeader>
-    <CardContent>
-      <p className="text-sm text-gray-600">{descuento.descripcion}</p>
-      {!descuento.reclamado && (
-        <Button onClick={() => onReclamar(descuento.id)} className="mt-2 w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">
-          Reclamar y Aplicar
-        </Button>
-      )}
-    </CardContent>
-  </Card>
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <Card className="border-gray-300 bg-gray-100">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-gray-700">{descuento.nombre}</CardTitle>
+        <Badge variant="outline" className={descuento.reclamado ? "text-gray-500 border-gray-400" : "text-green-600 border-green-500"}>
+          {descuento.reclamado ? (isActive ? "Activo" : "Reclamado") : "Disponible"}
+        </Badge>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-gray-600">{descuento.descripcion}</p>
+        {!descuento.reclamado && (
+          <Button 
+            onClick={() => onReclamar(descuento.id)} 
+            className="mt-2 w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white transition-colors duration-200"
+          >
+            Reclamar y Aplicar
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  </motion.div>
 )
 
 interface FormaPedido {
@@ -169,6 +184,8 @@ export default function EnviosExpress() {
     { id: 1, tipo: "Tarjeta de crédito", numero: "**** **** **** 1234" },
     { id: 2, tipo: "Efectivo", numero: "N/A" },
   ])
+  const [showNewCardForm, setShowNewCardForm] = useState(false)
+  const [newCard, setNewCard] = useState({ numero: '', titular: '', fechaVencimiento: '', cvv: '' })
 
   useEffect(() => {
     const tabsList = document.querySelector('[role="tablist"]')
@@ -270,27 +287,53 @@ export default function EnviosExpress() {
     setIsLoggedIn(true)
   }
 
+  const handleAddNewCard = (e: React.FormEvent) => {
+    e.preventDefault()
+    const newId = metodosPago.length + 1
+    const newMetodoPago: MetodoPago = {
+      id: newId,
+      tipo: "Tarjeta de crédito",
+      numero: `**** **** **** ${newCard.numero.slice(-4)}`
+    }
+    setMetodosPago([...metodosPago, newMetodoPago])
+    setShowNewCardForm(false)
+    setNewCard({ numero: '', titular: '', fechaVencimiento: '', cvv: '' })
+  }
+
   return (
     <div className="container mx-auto p-4 bg-white min-h-screen">
       <motion.h1 
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-3xl font-bold mb-6 text-center text-[#CA0007] flex items-center justify-center"
+        className="text-4xl font-bold mb-6 text-center flex items-center justify-center"
       >
-        <Send className="w-8 h-8 mr-2 text-[#CA0007]" />
-        EnviosYa
+        <span className="bg-gradient-to-r from-[#CA0007] to-[#FF4136] text-transparent bg-clip-text drop-shadow-lg">
+          <Send className="w-10 h-10 mr-3 inline-block text-[#CA0007]" />
+          EnviosYa
+        </span>
       </motion.h1>
 
-      <Tabs defaultValue="nuevo-pedido" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-gray-100">
-          <TabsTrigger value="nuevo-pedido" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">
+      <Tabs defaultValue="nuevo-pedido" className="w-full max-w-4xl mx-auto">
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100 rounded-lg overflow-hidden">
+          <TabsTrigger value="nuevo-pedido" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700 transition-all duration-200 flex items-center justify-center"
+            onClick={() => setActiveTab('nuevo-pedido')}
+          >
+            <Package className="w-4 h-4 mr-2" />
             Nuevo Pedido
           </TabsTrigger>
-          <TabsTrigger value="seguimiento" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">
+          <TabsTrigger value="seguimiento"
+            className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700 transition-all duration-200 flex items-center justify-center"
+            onClick={() => setActiveTab('seguimiento')}
+          >
+            <Truck className="w-4 h-4 mr-2" />
             Seguimiento
           </TabsTrigger>
-          <TabsTrigger value="cuenta" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">
+          <TabsTrigger value="cuenta"
+            className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700 transition-all duration-200 flex items-center justify-center"
+            onClick={() => setActiveTab('cuenta')}
+          >
+            <User className="w-4 h-4 mr-2" />
             Mi Cuenta
           </TabsTrigger>
         </TabsList>
@@ -307,14 +350,17 @@ export default function EnviosExpress() {
             <TabsContent value="nuevo-pedido">
               <Card className="border-gray-300 shadow-md bg-white">
                 <CardHeader className="bg-gray-100 pt-8">
-                  <CardTitle className="text-[#CA0007]">Realizar Nuevo Pedido</CardTitle>
+                  <CardTitle className="text-[#CA0007] flex items-center justify-center">
+                    <Package className="w-6 h-6 mr-2" />
+                    Realizar Nuevo Pedido
+                  </CardTitle>
                   <CardDescription className="text-gray-600">Ingrese los detalles de su envío</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
                   {!isLoggedIn ? (
                     <div className="text-center space-y-4">
                       <p className="text-gray-700">Para realizar un pedido, por favor inicie sesión o regístrese.</p>
-                      <Button onClick={() => setActiveTab('cuenta')} className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">
+                      <Button onClick={() => setActiveTab('cuenta')} className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white transition-colors duration-200">
                         Ir a Mi Cuenta
                       </Button>
                     </div>
@@ -322,14 +368,20 @@ export default function EnviosExpress() {
                     <form className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="origen" className="text-gray-700">Origen</Label>
+                          <Label htmlFor="origen" className="text-gray-700 flex items-center">
+                            <MapPin className="w-4 h-4 mr-2" />
+                            Origen
+                          </Label>
                           <Input id="origen" placeholder="Ciudad de origen"
                                  value={pedido.origen}
                                  onChange={(e) => setPedido({...pedido, origen: e.target.value})}
                                  className="bg-white text-gray-700 border-gray-300" />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="destino" className="text-gray-700">Destino</Label>
+                          <Label htmlFor="destino" className="text-gray-700 flex items-center">
+                            <MapPin className="w-4 h-4 mr-2" />
+                            Destino
+                          </Label>
                           <Input id="destino" placeholder="Ciudad de destino"
                                  value={pedido.destino}
                                  onChange={(e) => setPedido({...pedido, destino: e.target.value})}
@@ -338,14 +390,20 @@ export default function EnviosExpress() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="peso" className="text-gray-700">Peso (kg)</Label>
+                          <Label htmlFor="peso" className="text-gray-700 flex items-center">
+                            <Package className="w-4 h-4 mr-2" />
+                            Peso (kg)
+                          </Label>
                           <Input id="peso" type="number" placeholder="Peso del paquete"
                                  value={pedido.peso}
                                  onChange={(e) => setPedido({...pedido, peso: e.target.value})}
                                  className="bg-white text-gray-700 border-gray-300" />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="tipo-envio" className="text-gray-700">Tipo de Envío</Label>
+                          <Label htmlFor="tipo-envio" className="text-gray-700 flex items-center">
+                            <Truck className="w-4 h-4 mr-2" />
+                            Tipo de Envío
+                          </Label>
                           <Select onValueChange={(value) => setPedido({...pedido, tipoEnvio: value})}>
                             <SelectTrigger id="tipo-envio" className="bg-white text-gray-700 border-gray-300">
                               <SelectValue placeholder="Seleccione tipo de envío" />
@@ -359,7 +417,10 @@ export default function EnviosExpress() {
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="metodo-pago" className="text-gray-700">Método de Pago</Label>
+                        <Label htmlFor="metodo-pago" className="text-gray-700 flex items-center">
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Método de Pago
+                        </Label>
                         <Select onValueChange={setSelectedPaymentMethod} value={selectedPaymentMethod}>
                           <SelectTrigger id="metodo-pago" className="bg-white text-gray-700 border-gray-300">
                             <SelectValue placeholder="Seleccione método de pago" />
@@ -376,7 +437,12 @@ export default function EnviosExpress() {
                       </div>
 
                       {descuentoActivo && (
-                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+                          role="alert"
+                        >
                           <strong className="font-bold">Descuento Aplicado: </strong>
                           <span className="block sm:inline">
                             {descuentoActivo.nombre} - {descuentoActivo.porcentaje}% de descuento
@@ -387,24 +453,26 @@ export default function EnviosExpress() {
                           {costoCalculado && (
                             <p className="mt-2">Nuevo costo total: ${costo.toFixed(2)}</p>
                           )}
-                        </div>
+                        </motion.div>
                       )}
 
                       <div className="flex space-x-4">
                         <Button 
                           type="button" 
                           onClick={calcularCosto} 
-                          className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white"
+                          className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white transition-colors duration-200 flex items-center"
                         >
+                          <DollarSign className="w-4 h-4 mr-2" />
                           Calcular Costo
                         </Button>
                         <motion.div whileHover={{ scale: costoCalculado ? 1.05 : 1 }} whileTap={{ scale: costoCalculado ? 0.95 : 1 }}>
                           <Button 
                             type="button" 
                             onClick={realizarPedido} 
-                            className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white" 
+                            className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white transition-colors duration-200 flex items-center" 
                             disabled={!costoCalculado || !selectedPaymentMethod}
                           >
+                            <Send className="w-4 h-4 mr-2" />
                             Realizar Pedido
                           </Button>
                         </motion.div>
@@ -418,7 +486,7 @@ export default function EnviosExpress() {
                     >
                       <p className="text-green-600 text-xl">¡Pedido realizado con éxito!</p>
                       <p className="text-gray-700">Número de seguimiento: {trackingId}</p>
-                      <Button onClick={reiniciarFormulario} className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">
+                      <Button onClick={reiniciarFormulario} className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white transition-colors duration-200">
                         Realizar nuevo envío
                       </Button>
                     </motion.div>
@@ -445,7 +513,10 @@ export default function EnviosExpress() {
             <TabsContent value="seguimiento">
               <Card className="border-gray-300 shadow-md bg-white">
                 <CardHeader className="bg-gray-100 pt-8">
-                  <CardTitle className="text-[#CA0007]">Seguimiento de Pedidos</CardTitle>
+                  <CardTitle className="text-[#CA0007] flex items-center justify-center">
+                    <Truck className="w-6 h-6 mr-2" />
+                    Seguimiento de Pedidos
+                  </CardTitle>
                   <CardDescription className="text-gray-600">Historial de sus envíos</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
@@ -465,18 +536,21 @@ export default function EnviosExpress() {
             <TabsContent value="cuenta">
               <Card className="border-gray-300 shadow-md bg-white">
                 <CardHeader className="bg-gray-100 pt-8">
-                  <CardTitle className="text-[#CA0007]">Mi Cuenta</CardTitle>
+                  <CardTitle className="text-[#CA0007] flex items-center justify-center">
+                    <User className="w-6 h-6 mr-2" />
+                    Mi Cuenta
+                  </CardTitle>
                   <CardDescription className="text-gray-600">Gestione su cuenta, descuentos y pagos</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
                   {!isLoggedIn ? (
                     <Tabs value={activeAccountTab} onValueChange={setActiveAccountTab} className="w-full">
-                      <TabsList className="grid w-full grid-cols-2 bg-gray-100">
-                        <TabsTrigger value="login" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">
+                      <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-lg overflow-hidden">
+                        <TabsTrigger value="login" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700 transition-all duration-200">
                           <LogIn className="w-4 h-4 mr-2" />
                           Iniciar Sesión
                         </TabsTrigger>
-                        <TabsTrigger value="register" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700">
+                        <TabsTrigger value="register" className="data-[state=active]:bg-[#CA0007] data-[state=active]:text-white text-gray-700 transition-all duration-200">
                           <UserPlus className="w-4 h-4 mr-2" />
                           Registrarse
                         </TabsTrigger>
@@ -491,7 +565,7 @@ export default function EnviosExpress() {
                             <Label htmlFor="password" className="text-gray-700">Contraseña</Label>
                             <Input id="password" type="password" placeholder="********" required className="bg-white text-gray-700 border-gray-300" />
                           </div>
-                          <Button type="submit" className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">Iniciar Sesión</Button>
+                          <Button type="submit" className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white transition-colors duration-200">Iniciar Sesión</Button>
                         </form>
                       </TabsContent>
                       <TabsContent value="register">
@@ -508,47 +582,57 @@ export default function EnviosExpress() {
                             <Label htmlFor="register-password" className="text-gray-700">Contraseña</Label>
                             <Input id="register-password" type="password" placeholder="********" required className="bg-white text-gray-700 border-gray-300" />
                           </div>
-                          <Button type="submit" className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">Registrarse</Button>
+                          <Button type="submit" className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white transition-colors duration-200">Registrarse</Button>
                         </form>
                       </TabsContent>
                     </Tabs>
                   ) : (
                     <div className="space-y-8">
-                      {activeAccountSection === '' ? (
+                      {activeAccountSection === '' ?
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                          <Button 
-                            onClick={() => setActiveAccountSection('descuentos')} 
-                            className="flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-all hover:shadow-md"
-                          >
-                            <Percent className="w-12 h-12 mb-4" />
-                            <span className="text-lg font-medium">Descuentos</span>
-                          </Button>
-                          <Button 
-                            onClick={() => setActiveAccountSection('pagos')} 
-                            className="flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-all hover:shadow-md"
-                          >
-                            <Wallet className="w-12 h-12 mb-4" />
-                            <span className="text-lg font-medium">Métodos de Pago</span>
-                          </Button>
-                          <Button 
-                            onClick={() => setActiveAccountSection('historial')} 
-                            className="flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-all hover:shadow-md"
-                          >
-                            <ClipboardList className="w-12 h-12 mb-4" />
-                            <span className="text-lg font-medium">Historial de Pedidos</span>
-                          </Button>
+                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button 
+                              onClick={() => setActiveAccountSection('descuentos')} 
+                              className="w-full h-full flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-all hover:shadow-md"
+                            >
+                              <Percent className="w-12 h-12 mb-4" />
+                              <span className="text-lg font-medium">Descuentos</span>
+                            </Button>
+                          </motion.div>
+                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button 
+                              onClick={() => setActiveAccountSection('pagos')} 
+                              className="w-full h-full flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-all hover:shadow-md"
+                            >
+                              <Wallet className="w-12 h-12 mb-4" />
+                              <span className="text-lg font-medium">Métodos de Pago</span>
+                            </Button>
+                          </motion.div>
+                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button 
+                              onClick={() => setActiveAccountSection('historial')} 
+                              className="w-full h-full flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-gray-200 transition-all hover:shadow-md"
+                            >
+                              <ClipboardList className="w-12 h-12 mb-4" />
+                              <span className="text-lg font-medium">Historial de Pedidos</span>
+                            </Button>
+                          </motion.div>
                         </div>
-                      ) : (
+                      : (
                         <div>
                           <Button 
                             onClick={() => setActiveAccountSection('')} 
-                            className="mb-6 flex items-center text-gray-600 hover:text-gray-800"
+                            className="mb-6 flex items-center text-gray-600 hover:text-gray-800 transition-colors duration-200"
                           >
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Volver
                           </Button>
                           {activeAccountSection === 'descuentos' && (
-                            <div>
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
                               <h3 className="text-lg font-medium text-gray-700 mb-4">Descuentos Disponibles</h3>
                               <div className="space-y-4">
                                 {descuentos.map(descuento => (
@@ -560,10 +644,14 @@ export default function EnviosExpress() {
                                   />
                                 ))}
                               </div>
-                            </div>
+                            </motion.div>
                           )}
                           {activeAccountSection === 'pagos' && (
-                            <div>
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
                               <h3 className="text-lg font-medium text-gray-700 mb-4">Métodos de Pago</h3>
                               <div className="space-y-4">
                                 {metodosPago.map(metodo => (
@@ -573,20 +661,95 @@ export default function EnviosExpress() {
                                         <p className="text-sm font-medium text-gray-700">{metodo.tipo}</p>
                                         <p className="text-xs text-gray-500">{metodo.numero}</p>
                                       </div>
-                                      <Button variant="outline" size="sm" className="text-gray-600 border-gray-300 hover:bg-gray-200">
+                                      <Button variant="outline" size="sm" className="text-gray-600 border-gray-300 hover:bg-gray-200 transition-colors duration-200">
                                         Editar
                                       </Button>
                                     </CardContent>
                                   </Card>
                                 ))}
-                                <Button className="w-auto px-6 bg-[#CA0007] hover:bg-[#A80006] text-white">
-                                  Agregar Método de Pago
-                                </Button>
+                                {!showNewCardForm ? (
+                                  <Button 
+                                    onClick={() => setShowNewCardForm(true)} 
+                                    className="w-full px-6 bg-[#CA0007] hover:bg-[#A80006] text-white transition-colors duration-200"
+                                  >
+                                    <PlusCircle className="w-4 h-4 mr-2" />
+                                    Agregar Nueva Tarjeta
+                                  </Button>
+                                ) : (
+                                  <Card className="border-gray-300 bg-gray-100">
+                                    <CardContent>
+                                      <form onSubmit={handleAddNewCard} className="space-y-4 py-4">
+                                        <div className="space-y-2">
+                                          <Label htmlFor="card-number" className="text-gray-700">Número de Tarjeta</Label>
+                                          <Input 
+                                            id="card-number" 
+                                            placeholder="1234 5678 9012 3456" 
+                                            value={newCard.numero}
+                                            onChange={(e) => setNewCard({...newCard, numero: e.target.value})}
+                                            className="bg-white text-gray-700 border-gray-300" 
+                                          />
+                                        </div>
+                                        <div className="space-y-2">
+                                          <Label htmlFor="card-holder" className="text-gray-700">Titular de la Tarjeta</Label>
+                                          <Input 
+                                            id="card-holder" 
+                                            placeholder="Juan Pérez" 
+                                            value={newCard.titular}
+                                            onChange={(e) => setNewCard({...newCard, titular: e.target.value})}
+                                            className="bg-white text-gray-700 border-gray-300" 
+                                          />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div className="space-y-2">
+                                            <Label htmlFor="expiry-date" className="text-gray-700">Fecha de Vencimiento</Label>
+                                            <Input 
+                                              id="expiry-date" 
+                                              placeholder="MM/AA" 
+                                              value={newCard.fechaVencimiento}
+                                              onChange={(e) => setNewCard({...newCard, fechaVencimiento: e.target.value})}
+                                              className="bg-white text-gray-700 border-gray-300" 
+                                            />
+                                          </div>
+                                          <div className="space-y-2">
+                                            <Label htmlFor="cvv" className="text-gray-700">CVV</Label>
+                                            <Input 
+                                              id="cvv" 
+                                              placeholder="123" 
+                                              value={newCard.cvv}
+                                              onChange={(e) => setNewCard({...newCard, cvv: e.target.value})}
+                                              className="bg-white text-gray-700 border-gray-300" 
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className="flex justify-end space-x-2">
+                                          <Button 
+                                            type="button" 
+                                            onClick={() => setShowNewCardForm(false)}
+                                            variant="outline" 
+                                            className="px-4 py-2 text-gray-600 border-gray-300 hover:bg-gray-200 transition-colors duration-200"
+                                          >
+                                            Cancelar
+                                          </Button>
+                                          <Button 
+                                            type="submit"
+                                            className="px-4 py-2 bg-[#CA0007] hover:bg-[#A80006] text-white transition-colors duration-200"
+                                          >
+                                            Agregar Tarjeta
+                                          </Button>
+                                        </div>
+                                      </form>
+                                    </CardContent>
+                                  </Card>
+                                )}
                               </div>
-                            </div>
+                            </motion.div>
                           )}
                           {activeAccountSection === 'historial' && (
-                            <div>
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
                               <h3 className="text-lg font-medium text-gray-700 mb-4">Historial de Pedidos</h3>
                               <div className="space-y-4">
                                 {pedidos.map((pedido) => (
@@ -596,7 +759,7 @@ export default function EnviosExpress() {
                                   <p className="text-gray-600 text-center">No hay pedidos realizados aún.</p>
                                 )}
                               </div>
-                            </div>
+                            </motion.div>
                           )}
                         </div>
                       )}
